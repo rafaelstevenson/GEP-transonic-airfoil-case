@@ -22,7 +22,7 @@ class MinMaxScaler:
 #df['Cd'] = scaler_y.fit_transform(df['Cd'])
 
 
-func_set = ['+','-','*','/', '(sqrt)','(exp)', '(ln)']
+func_set = ['+','-','*','/', '(sqrt)','(exp)','(X2)']
 
 term_set = ['a']
 operator_probabilities = {
@@ -34,7 +34,7 @@ operator_probabilities = {
 head_length = 7
 population_size = 300
 generations = 20
-fitness_func = 'r2'
+fitness_func = 'mse'
 
 GEPProcess = GeneExpressionProgramming(head_length,func_set,term_set,operator_probabilities)
 GEPProcess.RunGEP(df['AoA'],df['Cd'],population_size,generations,fitness_func)

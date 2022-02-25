@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import math
 from sklearn.metrics import mean_squared_error, r2_score
 
-one_arity_func = ['(sqrt)', '(sin)', '(exp)', '(ln)', '(inv)', '(gau)']
+one_arity_func = ['(sqrt)', '(sin)', '(exp)', '(ln)', '(inv)', '(gau)', '(X2)']
 two_arity_func = ['+', '-', '*', '/']
 
 def ChromToET(chromosome):
@@ -99,6 +99,8 @@ def EvaluateET(chromosome, variable_dict):
             result = 1 / a
         elif representation=='(gau)':
             result = np.random.normal(1)
+        elif representation=='(X2)':
+            result = a ** 2
 
         return str(result)
 
@@ -132,7 +134,7 @@ y_true = df['Cd']
 x = df['AoA']
 
 # declare the chromosome and the variable dictionary
-chromosome = ['/', 'a', '(exp)', '+', '(sqrt)', '*', '/', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a']
+chromosome = ['(X2)', '(X2)', '(X2)', '/', 'a', '+', '(sqrt)', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a']
 term_set = ['a']
 
 
@@ -156,7 +158,7 @@ y_pred = np.array(y_pred)
 print(f'Prediction Mean Squared Error (MSE): {mean_squared_error(y_true, y_pred)}')
 print(f'Prediction R-squared Score (R2): {r2_score(y_true, y_pred)}')
 
-plt.scatter(x, y_pred)
-plt.scatter(x, y_true)
+plt.scatter(x, y_pred ,label='Prediction')
+plt.scatter(x, y_true, label='Ground Truth')
+plt.legend()
 plt.show()
-print(y_pred)

@@ -1,0 +1,2 @@
+After 20 generations, fittest Chromosome Result:((X2)(X2)(X2)/a+(sqrt)aaaaaaaa) with fitness value 999.9777815528918
+ in list ['(X2)', '(X2)', '(X2)', '/', 'a', '+', '(sqrt)', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a']
