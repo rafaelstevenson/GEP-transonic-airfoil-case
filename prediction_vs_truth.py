@@ -40,7 +40,7 @@ def ChromToET(chromosome):
     return expr_tree
 
 
-def EvaluateET(chromosome, variable_dict):
+def EvaluateET(chromosome, variable_dict, const_list):
     '''Take chromosome and terminal variable dictionary{'symbol':value}
     and perform calculation from the chromosome->ET->calculation->prediction'''
 
@@ -48,10 +48,14 @@ def EvaluateET(chromosome, variable_dict):
     expr_tree = ChromToET(chromosome)
     for i in range(len(expr_tree)):  # iterate rows
         el = 0
+        el_dc = 0
         for element in expr_tree[i]:  # iterate elements in a row
             if element in variable_dict.keys():
                 expr_tree[i][el] = str(variable_dict[element])
+            elif element =='?':
+                expr_tree[i][el] = str(const_list[el_dc])
             el += 1
+
 
     def operate_two_arity(representation, a, b):
         a = float(a)
@@ -134,10 +138,9 @@ y_true = df['Cd']
 x = df['AoA']
 
 # declare the chromosome and the variable dictionary
-chromosome = ['(X2)', '(X2)', '(X2)', '/', 'a', '+', '(sqrt)', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a']
+chromosome = ['/', '(X2)', '/', 'a', '(exp)', '*', 'a', 'a', '?', '?', 'a', 'a', '?', '?', 'a', '6', '0', '4', '6', '3', '2', '3', '2']
 term_set = ['a']
-
-
+const_list = [0.01100726, 0.01682561, 0.01555461, 0.01705792, 0.00568456, 0.01645038,0.0129643,  0.01609162]
 
 y_true = df['Cd']
 
@@ -149,7 +152,7 @@ for i in range(len(pd.DataFrame(x))):
     for term in term_set:
         variable_dict[term] = pd.DataFrame(x).iloc[i, nth_input]
         nth_input += 1
-    prediction = EvaluateET(chromosome, variable_dict)
+    prediction = EvaluateET(chromosome, variable_dict, const_list)
     y_pred.append(prediction)
 
 y_pred = np.array(y_pred)

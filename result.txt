@@ -1,2 +1,2 @@
-After 20 generations, fittest Chromosome Result:((X2)(X2)(X2)/a+(sqrt)aaaaaaaa) with fitness value 999.9777815528918
- in list ['(X2)', '(X2)', '(X2)', '/', 'a', '+', '(sqrt)', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a']
+After 20 generations, fittest Chromosome Result:(/(X2)/a(exp)*aa??aa??a60463232) with fitness value 999.9984215490416
+ in list ['/', '(X2)', '/', 'a', '(exp)', '*', 'a', 'a', '?', '?', 'a', 'a', '?', '?', 'a', '6', '0', '4', '6', '3', '2', '3', '2']

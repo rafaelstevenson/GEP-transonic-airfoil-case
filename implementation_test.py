@@ -24,7 +24,8 @@ class MinMaxScaler:
 
 func_set = ['+','-','*','/', '(sqrt)','(exp)','(X2)']
 
-term_set = ['a']
+term_set = ['a', '?']
+const_range = [0.001,0.02]
 operator_probabilities = {
     "Mutation":0.2, "Inversion":0.1, "IS Transposition":0.1,
     "RIS Transposition":0.1, "One-point Recombination":0.3,
@@ -36,6 +37,6 @@ population_size = 300
 generations = 20
 fitness_func = 'mse'
 
-GEPProcess = GeneExpressionProgramming(head_length,func_set,term_set,operator_probabilities)
+GEPProcess = GeneExpressionProgramming(head_length,func_set,term_set,const_range,operator_probabilities)
 GEPProcess.RunGEP(df['AoA'],df['Cd'],population_size,generations,fitness_func)
 GEPProcess.VisualizeResults()
