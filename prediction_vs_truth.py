@@ -133,16 +133,16 @@ def EvaluateET(chromosome, variable_dict, const_list):
 
 
 # load dataset to get ground truth
-df = pd.read_csv('../testing_datasets/transonic_airfoil_data_set.csv')
-y_true = df['Cd']
-x = df['AoA']
+df = pd.read_excel('../testing_datasets/forrester.xls')
+y_true = df['output']
+x = df['input1']
 
 # declare the chromosome and the variable dictionary
-chromosome = ['/', '(X2)', '/', 'a', '(exp)', '*', 'a', 'a', '?', '?', 'a', 'a', '?', '?', 'a', '6', '0', '4', '6', '3', '2', '3', '2']
+chromosome = ['*', '*', '/', '(sin)', '*', '(X2)', '*', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', '6', '6', '0', '0', '7', '5', '1', '0']
 term_set = ['a']
 const_list = [0.01100726, 0.01682561, 0.01555461, 0.01705792, 0.00568456, 0.01645038,0.0129643,  0.01609162]
 
-y_true = df['Cd']
+y_true = df['output']
 
 # Perform Prediction
 y_pred = []
@@ -162,6 +162,7 @@ print(f'Prediction Mean Squared Error (MSE): {mean_squared_error(y_true, y_pred)
 print(f'Prediction R-squared Score (R2): {r2_score(y_true, y_pred)}')
 
 plt.scatter(x, y_pred ,label='Prediction')
-plt.scatter(x, y_true, label='Ground Truth')
+#plt.scatter(x, y_true, label='Ground Truth')
+plt.plot(x,y_true,label='Ground Truth',color='red')
 plt.legend()
 plt.show()

@@ -3,7 +3,7 @@ import pandas as pd
 from GEP import GeneExpressionProgramming
 
 
-df = pd.read_csv('../testing_datasets/transonic_airfoil_data_set.csv')
+df = pd.read_excel('../testing_datasets/forrester.xls')
 print(df.head())
 
 class MinMaxScaler:
@@ -22,10 +22,11 @@ class MinMaxScaler:
 #df['Cd'] = scaler_y.fit_transform(df['Cd'])
 
 
-func_set = ['+','-','*','/', '(sqrt)','(exp)','(X2)']
+func_set = ['+','-','*','/','(sin)','(X2)','(sqrt)','(exp)']
 
-term_set = ['a', '?']
-const_range = [0.001,0.02]
+#term_set = ['a', '?']
+term_set = ['a']
+const_range = [1,15]
 operator_probabilities = {
     "Mutation":0.2, "Inversion":0.1, "IS Transposition":0.1,
     "RIS Transposition":0.1, "One-point Recombination":0.3,
@@ -33,10 +34,10 @@ operator_probabilities = {
 }
 
 head_length = 7
-population_size = 300
+population_size = 50
 generations = 20
 fitness_func = 'mse'
 
 GEPProcess = GeneExpressionProgramming(head_length,func_set,term_set,const_range,operator_probabilities)
-GEPProcess.RunGEP(df['AoA'],df['Cd'],population_size,generations,fitness_func)
+GEPProcess.RunGEP(df['input1'],df['output'],population_size,generations,fitness_func)
 GEPProcess.VisualizeResults()

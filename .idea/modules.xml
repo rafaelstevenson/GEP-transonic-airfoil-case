@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/GEP_TransonicAirfoilCase.iml" filepath="$PROJECT_DIR$/.idea/GEP_TransonicAirfoilCase.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/GEP_ForresterCase.iml" filepath="$PROJECT_DIR$/.idea/GEP_ForresterCase.iml" />
     </modules>
   </component>
 </project>
