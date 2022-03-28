@@ -32,6 +32,7 @@ class GeneExpressionProgramming():
 
         self.dc_length = self.ntail
         self.const_list = np.random.uniform(const_range[0],const_range[1],self.dc_length)
+        #self.const_list = [3.0,1.1,4.0,1.1,4.0,1.1,4.0,1.1]
 
         self.operator_probabilities = operator_probabilities
 
@@ -51,9 +52,20 @@ class GeneExpressionProgramming():
         plt.savefig('Fitness Value vs Generation.png')
         plt.show()
 
+        average_fitness_mse = [self.gen_pop_fit_history[i]['Mean mse'] for i in range(self.ngenerations + 1)]
+        max_fitness_mse = [self.gen_pop_fit_history[i]['Fittest mse'] for i in range(self.ngenerations + 1)]
+        #plt.plot(generation, average_fitness_mse, label='Avg MSE', marker='.')
+        plt.plot(generation, max_fitness_mse, label='Fittest MSE', marker='.')
+        plt.legend()
+        plt.xlabel('Generation')
+        plt.ylabel('Fitness Value (Min 0)')
+        plt.title('MSE vs Generation')
+        plt.savefig('MSE vs Generation.png')
+        plt.show()
+
     def RunGEP(self, x, y, popsize, ngenerations, fitness_func):
 
-        def AddGenInfo(gen_pop_fit_history, generation, population, fitness):
+        def AddGenInfo(gen_pop_fit_history, generation, population, fitness, fitness_mse):
 
             '''Add an entry to the generation:{population,history} info dictionary
             from current generation, population ORF list and fitness list'''
@@ -62,7 +74,9 @@ class GeneExpressionProgramming():
                 'Population': population, 'Fitness': fitness,
                 'Max Fitness Value': max(fitness),
                 'Fittest Chromosome': population[fitness.index(max(fitness))].copy(),
-                'Mean Fitness': statistics.mean(fitness)
+                'Mean Fitness': statistics.mean(fitness),
+                'Fittest mse': min(fitness_mse),
+                'Mean mse': statistics.mean(fitness_mse)
             }
             #'Chromosome,Fitness': set(zip(population, fitness)),
             #print(gen_pop_fit_history[generation])
@@ -106,9 +120,10 @@ class GeneExpressionProgramming():
 
             # Change string to list in each row of ET and change variables to sample value
             expr_tree = ChromToET(chromosome)
+            el_dc = 0
             for i in range(len(expr_tree)): #iterate rows
                 el = 0
-                el_dc = 0
+                #el_dc = 0
                 for element in expr_tree[i]: #iterate elements in a row
                     if element in variable_dict.keys():
                         expr_tree[i][el] = str(variable_dict[element])
@@ -230,8 +245,9 @@ class GeneExpressionProgramming():
                     variable_dict = {}
                     nth_input = 0
                     for term in self.term_set:
-                        variable_dict[term] = pd.DataFrame(x).iloc[i, nth_input]
-                        nth_input += 1
+                        if term != '?':
+                            variable_dict[term] = pd.DataFrame(x).iloc[i, nth_input]
+                            nth_input += 1
 
                     prediction = EvaluateET(chromosome, variable_dict)
                     prediction_list.append(prediction)
@@ -292,7 +308,7 @@ class GeneExpressionProgramming():
                         chromosome[index] = random.choice(self.func_set + self.func_set)
                     elif index >= self.nhead:  # if randomizer picks to mutate tail region
                         chromosome[index] = random.choice(self.term_set)
-
+                    #Mutation for constant domain
                     index_dc = -random.randint(1, self.dc_length)
                     chromosome[index_dc] = str(random.randint(0,self.dc_length-1))
                 new_population.append(chromosome.copy())
@@ -324,6 +340,21 @@ class GeneExpressionProgramming():
                     for i in range(start_index, end_index + 1):
                         chromosome[i] = inverted_seq[new]
                         new += 1
+
+                    #add inversion for constant domain !!
+                    indexes_dc = sorted(random.sample(range(self.chrom_length, self.chrom_length+self.dc_length), 2))
+                    start_index_dc = indexes_dc[0]
+                    end_index_dc = indexes_dc[1]
+
+                    inverse_seq_dc = chromosome[start_index_dc:end_index_dc + 1]
+                    inverted_seq_dc = []
+                    for element in reversed(inverse_seq_dc):
+                        inverted_seq_dc.append(element)
+                    new_dc = 0
+                    for i in range(start_index_dc, end_index_dc + 1):
+                        chromosome[i] = inverted_seq_dc[new_dc]
+                        new_dc += 1
+
 
                 new_population.append(chromosome.copy())
 
@@ -402,18 +433,18 @@ class GeneExpressionProgramming():
             '''Perform OnePoint Recombination'''
             new_population = []
             recombination_pool = []
-            for chromosome in population:
+            for chromosome in population:  #Choose chromosomes to recombine
                 recombine = random.random() < probability
                 if recombine == True:
                     recombination_pool.append(chromosome.copy())
                 elif recombine == False:
                     new_population.append(chromosome.copy())
 
-            if len(recombination_pool) == 1:
+            if len(recombination_pool) == 1: #If only 1 to recombine, return it
                 new_population.append(recombination_pool[0].copy())
 
             while len(recombination_pool)>1:
-                if len(recombination_pool)>2:
+                if len(recombination_pool)>2: #Determine which chromosome by index to recombine
                     indexes = sorted(random.sample(range(0, len(recombination_pool) - 1), 2))
                     first_parent = recombination_pool[indexes[0]].copy()
                     second_parent = recombination_pool[indexes[1]].copy()
@@ -424,8 +455,9 @@ class GeneExpressionProgramming():
                     first_parent = recombination_pool[0]
                     second_parent = recombination_pool[1]
 
-
-                recombination_start_index = random.randint(1, len(chromosome)-2)
+                #Head and tail domain recombination
+                recombination_start_index = random.randint(1, self.chrom_length - 2)
+                #recombination_start_index = random.randint(1, len(chromosome)-2)
                 first_child = first_parent[0:recombination_start_index]
                 second_child = second_parent[0:recombination_start_index]
 
@@ -436,6 +468,20 @@ class GeneExpressionProgramming():
                     first_child.append(element)
                 for element in first_cross:
                     second_child.append(element)
+
+                #Constant domain recombination
+                recombination_start_index_dc = random.randint(self.chrom_length+1, self.chrom_length+self.dc_length-2)
+                first_child = first_parent[0:recombination_start_index_dc]
+                second_child = second_parent[0:recombination_start_index_dc]
+
+                first_cross = first_parent[recombination_start_index_dc:]
+                second_cross = second_parent[recombination_start_index_dc:]
+
+                for element in second_cross:
+                    first_child.append(element)
+                for element in first_cross:
+                    second_child.append(element)
+                ######
 
                 new_population.append(first_child.copy())
                 new_population.append(second_child.copy())
@@ -539,15 +585,17 @@ Constant list: {self.const_list}
 
             # Perform EvalFitness on every chromosome on current generation's population
             fitness = [EvalFitness(chromosome, x, y, fitness_func) for chromosome in population].copy()
+            fitness_mse = list((1000/np.array(fitness.copy()))-1).copy()
             print(f'Gen:{generation} Fitness Calculation completed')
 
             self.gen_pop_fit_history = AddGenInfo(self.gen_pop_fit_history, generation, population,
-                                                  fitness)  # Update history library
+                                                  fitness, fitness_mse)  # Update history library
 
             gen_fittest = self.gen_pop_fit_history[generation]['Fittest Chromosome'].copy()
             gen_fittest = ''.join(gen_fittest)
             fittest_value = self.gen_pop_fit_history[generation]['Max Fitness Value']
-            print(f'Gen:{generation} Fittest chromosome:({gen_fittest})     Fitness value:{fittest_value}')
+            fittest_mse = self.gen_pop_fit_history[generation]['Fittest mse']
+            print(f'Gen:{generation} Fittest chromosome:({gen_fittest})     Fitness value:{fittest_value}       MSE:{fittest_mse}')
             #print(self.gen_pop_fit_history)
 
             if generation==ngenerations:  # break while loop if last generation or (gen==ngen)
@@ -593,6 +641,7 @@ Constant list: {self.const_list}
 
             generation += 1  # generation +1 End of a new generation
         final_fittest_list = self.gen_pop_fit_history[ngenerations]['Fittest Chromosome']
+        final_fittest_ET = ChromToET(final_fittest_list)
         final_fittest = ''.join(final_fittest_list)
         final_fitness = self.gen_pop_fit_history[ngenerations]['Max Fitness Value']
         print(f'''
@@ -602,5 +651,5 @@ Fittest Chromosome Result:({final_fittest}) with fitness value {final_fitness}
 =========================================================
         ''')
         f = open("result.txt","w+")
-        f.write(f"After {generation} generations, fittest Chromosome Result:({final_fittest}) with fitness value {final_fitness}\n in list {final_fittest_list}")
+        f.write(f"After {generation} generations, fittest Chromosome Result:({final_fittest}) with fitness value {final_fitness}\n in list {final_fittest_list}\n constant list: {list(self.const_list)}\nExpression Tree: {final_fittest_ET}")
 
